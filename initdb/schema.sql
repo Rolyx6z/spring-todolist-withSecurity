@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id VARCHAR(20) NOT NULL UNIQUE,
+    pass VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS todo_groups(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id VARCHAR(20) NOT NULL,
+    group_name VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS todos(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id VARCHAR(20) NOT NULL,
+    todo VARCHAR(100) NOT NULL,
+    task_date DATE NOT NULL,
+    status INT DEFAULT 0,
+    group_id INT
+);
+

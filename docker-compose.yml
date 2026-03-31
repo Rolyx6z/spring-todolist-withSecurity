@@ -1,0 +1,39 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql-container
+    ports:
+      - "3307:3306"  # ローカルPCのツールからは3307で接続可能
+    environment:
+      MYSQL_DATABASE: todo
+      MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+      - ./initdb:/docker-entrypoint-initdb.d
+    # DBが本当にクエリを受け付けられる状態かチェックする設定
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppassword"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      target: build  # Dockerfileの第1ステージ(JDKがある方)を利用
+    container_name: spring-app
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./:/app      # ローカルのソースコードを同期
+    working_dir: /app
+    # JARを動かすのではなく、ソースから直接起動するコマンドに変更
+    command: ./mvnw spring-boot:run
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/todo?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Tokyo
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: password
+    restart: on-failure

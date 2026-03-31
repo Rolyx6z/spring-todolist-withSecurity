@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>TODOリスト</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.2.2/css/bootstrap.min.css}"/>
+</head>
+<body>
+    <div th:replace="share::header"></div>
+    <div class = "container mt-4" >
+        <form th:action="@{/group-create}" th:object="${registerGroupForm}" method="POST">
+            <p th:if="${#fields.hasErrors('groupName')}" th:errors="*{groupName}" class="text-danger">groupName error</p>
+            <div class="input-group input-group-sm mb-3" style="max-width: 600px;">
+                <span class="input-group-text">グループ名</span>
+                <input th:field="*{groupName}" class="form-control" />
+                <button type="submit" class="btn btn-primary">
+                    作成
+                </button>
+            </div>
+        </form>
+    </div>
+    <div class = "container mt-4" >
+        <form th:action="@{/group-select}" th:object="${idGroupForm}" method ="POST">
+            <p th:if="${#fields.hasErrors('id')}" th:errors="*{id}" class="text-danger">groupId error</p>
+            <div class = "d-flex align-items-center">
+            <select th:field="*{id}" class = "form-select me-3" style = "width: auto;" required>
+                <option value = "" selected>操作するグループを選択...</option>
+                <option th:each="group : ${groupList}"
+                        th:value="${group.id}"
+                        th:text="${group.groupName}">
+                </option>
+            </select>
+            <button type="submit" th:formaction="@{/group-select}" class = "btn btn-primary me-2">
+                選択
+            </button>
+            <button type="submit" th:formaction="@{/group-delete}" class = "btn btn-danger" onclick="return confirm('このグループを削除しますか');">
+                削除
+            </button>
+        </div>
+        </form>
+    </div>
+    <div class = "container mt-4" >
+        <h2 th:text="${nowGroupName} ?: 'グループ未選択'"></h2>
+    </div>
+    <div class="container mt-4">
+        <form th:object="${createTodoForm}" method="POST">
+
+            <p th:if="${#fields.hasErrors('todo')}" th:errors="*{todo}" class="text-danger"></p>
+            <p th:if="${#fields.hasErrors('taskDate')}" th:errors="*{taskDate}" class="text-danger"></p>
+            <p th:if="${#fields.hasErrors('id')}" th:errors="*{id}" class="text-danger"></p>
+
+            <div class="input-group mb-3" style="max-width: 800px;">
+                <span class="input-group-text">Todo名</span>
+                <input type="text" th:field="*{todo}" class="form-control" placeholder="何をする？" required />
+                <span class="input-group-text">期限日</span>
+                <input type="date" th:field="*{taskDate}" class="form-control" required />
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit" th:formaction="@{/todo-create}" class="btn btn-success">
+                    追加
+                </button>
+            </div>
+
+        </form>
+    </div>
+    <div class="container mt-4">
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">タスク名</th>
+                <th scope="col">日付</th>
+                <th scope="col">完了</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="todo : ${todoList}" class="align-middle">
+                <td th:text="${todo.todo}"></td>
+                <td th:text="${#temporals.format(todo.taskDate, 'yyyy/MM/dd')}">></td>
+                <td>
+                    <form th:action="@{/todo-complete}" method="POST">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <input type="hidden" name="id" th:value="${todo.id}" />
+                        <button type="submit" class="btn btn-outline-success btn-sm">
+                            完了
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>
